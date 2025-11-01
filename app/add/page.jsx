@@ -52,13 +52,16 @@ const Add = () => {
 		}
 
 		try {
-			const res = await fetch('http://localhost:3000/api/topics', {
-				method: 'POST',
-				headers: {
-					'Content-type': 'application/json',
-				},
-				body: JSON.stringify({ taskDescription, taskName, role }),
-			})
+			const res = await fetch(
+				'https://crud-application-zeta-peach.vercel.app/api/topics',
+				{
+					method: 'POST',
+					headers: {
+						'Content-type': 'application/json',
+					},
+					body: JSON.stringify({ taskDescription, taskName, role }),
+				}
+			)
 
 			if (res.ok) {
 				router.refresh()

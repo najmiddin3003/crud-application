@@ -47,9 +47,12 @@ export type Payment = {
 // 🔹 API dan ma’lumot olish
 const getTopics = async () => {
 	try {
-		const res = await fetch('http://localhost:3000/api/topics', {
-			cache: 'no-store',
-		})
+		const res = await fetch(
+			'https://crud-application-zeta-peach.vercel.app/api/topics',
+			{
+				cache: 'no-store',
+			}
+		)
 
 		if (!res.ok) {
 			throw new Error('Failed to fetch topics')

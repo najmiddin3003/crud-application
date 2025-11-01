@@ -45,13 +45,16 @@ export default function EditTopicForm({ id, taskName, taskDescription, role }) {
 		}
 
 		try {
-			const res = await fetch(`http://localhost:3000/api/topics/${id}`, {
-				method: 'PUT',
-				headers: {
-					'Content-type': 'application/json',
-				},
-				body: JSON.stringify({ newTaskName, newTaskDescription, newRole }),
-			})
+			const res = await fetch(
+				`https://crud-application-zeta-peach.vercel.app/api/topics/${id}`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-type': 'application/json',
+					},
+					body: JSON.stringify({ newTaskName, newTaskDescription, newRole }),
+				}
+			)
 
 			if (!res.ok) {
 				throw new Error('Failed to update topic')
