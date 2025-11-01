@@ -17,41 +17,63 @@ import GoogleIcon from '../../_components/assets/icons/google-logo.png'
 
 const Login = () => {
 	const [eye, setEye] = useState(false)
-
 	const [emailInput, setEmailInput] = useState('')
 	const [passwordInput, setPasswordInput] = useState('')
 	const [loader, setLoader] = useState(false)
 	const router = useRouter()
 
-	const handleData = e => {
+	const handleData = async e => {
 		e.preventDefault()
-		if (emailInput === '' || passwordInput === '') {
-			setTimeout(() => {
-				toast.error('Please fill the inputs!', {
-					className: 'bg-red-500 text-white font-semibold',
-				})
-				return
+
+		if (!emailInput || !passwordInput) {
+			toast.error('Please fill in all fields!', {
+				className: 'bg-red-500 text-white font-semibold',
+			})
+			return
+		}
+
+		setLoader(true)
+
+		try {
+			const res = await fetch('/api/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: emailInput,
+					password: passwordInput,
+				}),
 			})
 
-			setLoader(false)
-		} else {
-			setTimeout(() => {
-				toast.success('Successfully logged in', {
-					className: 'bg-green-500 text-white font-semibold',
+			const data = await res.json()
+
+			if (!res.ok) {
+				toast.error(data.message || 'Login failed!', {
+					className: 'bg-red-500 text-white font-semibold',
 				})
 				setLoader(false)
-				router.push('/add')
-			}, 3400)
-			setLoader(true)
+				return
+			}
+
+			toast.success('Successfully logged in!', {
+				className: 'bg-green-500 text-white font-semibold',
+			})
+			setLoader(false)
+
+			// 🔁 Yo‘naltirish (masalan, dashboard sahifasiga)
+			router.push('/add')
+		} catch (error) {
+			console.error(error)
+			toast.error('Server error!', {
+				className: 'bg-red-500 text-white font-semibold',
+			})
+			setLoader(false)
 		}
 	}
 
-	const handleEye = () => {
-		setEye(!eye)
-	}
+	const handleEye = () => setEye(!eye)
 
 	return (
-		<div className='h-screen flex items-center justify-center '>
+		<div className='h-screen flex items-center justify-center'>
 			<div className='rounded-xl dark:bg-[#000] py-4 px-10 w-120 min-h-content shadow-lg shadow-neutral-900/50'>
 				<h1 className='text-center font-bold uppercase my-5 text-4xl light:text-[#4a4a4a]'>
 					Login
@@ -64,33 +86,31 @@ const Login = () => {
 						<Input
 							onChange={e => setEmailInput(e.target.value)}
 							value={emailInput}
-							className='dark:bg-input border border-input
-'
+							className='dark:bg-input border border-input'
 							type='email'
 							placeholder='Please enter your email'
 						/>
-						<Label className='mt-4 mb-2' htmlFor='email'>
+
+						<Label className='mt-4 mb-2' htmlFor='password'>
 							Password
 						</Label>
 						<div className='flex items-center justify-between gap-2 relative'>
 							<Input
 								onChange={e => setPasswordInput(e.target.value)}
 								value={passwordInput}
-								className='dark:bg-input border border-input
-'
-								type='text'
+								className='dark:bg-input border border-input pr-8'
+								type={eye ? 'text' : 'password'}
 								placeholder='Please enter your password'
 							/>
-
 							{eye ? (
-								<Eye
-									onClick={handleEye}
-									className='absolute right-2 cursor-pointer'
-								/>
-							) : (
 								<EyeOff
 									onClick={handleEye}
 									className='absolute right-2 cursor-pointer opacity-50'
+								/>
+							) : (
+								<Eye
+									onClick={handleEye}
+									className='absolute right-2 cursor-pointer'
 								/>
 							)}
 						</div>
@@ -99,20 +119,12 @@ const Login = () => {
 							{loader ? (
 								<Button
 									type='submit'
-									className='w-full bg-gradient-to-r text-white 
-										 from-[#2a2a2a] cursor-no-drop to-[#4a4a4a] transition-all duration-300
-										 border border-neutral-700 shadow-md shadow-black/30 opacity-40 
-				'
+									className='w-full bg-gradient-to-r text-white from-[#2a2a2a] to-[#4a4a4a] opacity-60 cursor-no-drop'
 								>
 									<SpinnerCustom /> Signing in...
 								</Button>
 							) : (
-								<Button
-									type='submit'
-									variant={'outline'}
-									className='w-full
-				'
-								>
+								<Button type='submit' variant={'outline'} className='w-full'>
 									Sign in
 								</Button>
 							)}
@@ -124,21 +136,16 @@ const Login = () => {
 						</div>
 
 						<Separator className='my-4' />
-
 						<p className='text-center'>or</p>
 
 						<div className='flex items-center justify-center gap-4 mt-4'>
 							<Button variant={'outline'} size={'icon'} type='button'>
 								<div className='bg-white w-fit rounded-full'>
-									<div className='cursor-pointer'>
-										<Image className='w-5' src={GithubIcon} alt='Github icon' />
-									</div>
+									<Image className='w-5' src={GithubIcon} alt='Github icon' />
 								</div>
 							</Button>
 							<Button variant={'outline'} size={'icon'} type='button'>
-								<div className='cursor-pointer'>
-									<Image className='w-5' src={GoogleIcon} alt='Github icon' />
-								</div>
+								<Image className='w-5' src={GoogleIcon} alt='Google icon' />
 							</Button>
 							<ModeToggle />
 						</div>

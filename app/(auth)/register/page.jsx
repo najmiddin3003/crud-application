@@ -26,33 +26,50 @@ const Register = () => {
 	const [passwordInput, setPasswordInput] = useState('')
 	const [confirmPasswordInput, setConfirmPasswordInput] = useState('')
 
-	const handleData = e => {
+	const handleData = async e => {
 		e.preventDefault()
-
 		setButtonLoader(true)
 
-		if (
-			nameInput === '' ||
-			passwordInput === '' ||
-			confirmPasswordInput === ''
-		) {
-			setTimeout(() => {
-				setButtonLoader(false)
-				toast.error('Please fill in all fields!', {
+		if (!nameInput || !passwordInput || !confirmPasswordInput) {
+			toast.error('Please fill in all fields!', {
+				className: 'bg-red-500 text-white font-semibold',
+			})
+			setButtonLoader(false)
+			return
+		}
+
+		try {
+			const res = await fetch('/api/newUser', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: nameInput,
+					password: passwordInput,
+					confirmPassword: confirmPasswordInput,
+				}),
+			})
+
+			const data = await res.json()
+
+			if (!res.ok) {
+				toast.error(data.message || 'Something went wrong', {
 					className: 'bg-red-500 text-white font-semibold',
 				})
-			}, 700)
-			setButtonLoader(true)
-		} else {
-			setTimeout(() => {
-				toast.success('Successfullly registered!', {
-					className: 'bg-green-500 text-white font-semibold',
-				})
 				setButtonLoader(false)
-				router.push('/')
-			}, 3400)
+				return
+			}
 
-			setButtonLoader(true)
+			toast.success('Successfully registered!', {
+				className: 'bg-green-500 text-white font-semibold',
+			})
+
+			setButtonLoader(false)
+			router.push('/login')
+		} catch (error) {
+			toast.error('Server error!', {
+				className: 'bg-red-500 text-white font-semibold',
+			})
+			setButtonLoader(false)
 		}
 	}
 

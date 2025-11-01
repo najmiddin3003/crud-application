@@ -28,7 +28,8 @@
 		"**/*.tsx",
 		".next/types/**/*.ts",
 		"app/(auth)/register/page.jsx",
-		"app/(auth)/login/page.jsx"
+		"app/(auth)/login/page.jsx",
+		"app/add/page.jsx"
 	],
 	"exclude": ["node_modules"]
 }

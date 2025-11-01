@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import {
@@ -12,8 +13,9 @@ import {
 	useReactTable,
 	VisibilityState,
 } from '@tanstack/react-table'
-import { ArrowUpDown, ChevronDown, Edit3Icon, Trash2 } from 'lucide-react'
-import * as React from 'react'
+import { ArrowUpDown, ChevronDown, Edit3Icon } from 'lucide-react'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -32,115 +34,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import Link from 'next/link'
-
-const data: Payment[] = [
-	{
-		id: 'm5gr84i9',
-		taskDescription: 'This is task description',
-		taskName: 'Task name',
-		Role: 'Teacher',
-		createdAt: '2024-01-01',
-	},
-	{
-		id: '3u1reuv4',
-		taskDescription: 'Another task description',
-		taskName: 'Second task name',
-		Role: 'Viewer',
-		createdAt: '2024-01-02',
-	},
-	{
-		id: 'derv1ws0',
-		taskDescription: 'Some task description',
-		taskName: 'Third task name',
-		Role: 'Pupil',
-		createdAt: '2024-01-03',
-	},
-	{
-		id: '5kma53ae',
-		taskDescription: 'Yet another task description',
-		taskName: 'Fourth task name',
-		Role: 'Teacher',
-		createdAt: '2024-01-04',
-	},
-	{
-		id: 'bhqecj4p',
-		taskDescription: 'Final task description',
-		taskName: 'Fifth task name',
-		Role: 'Pupil',
-		createdAt: '2024-01-05',
-	},
-	{
-		id: 'm5gr84i9',
-		taskDescription: 'This is task description',
-		taskName: 'Task name',
-		Role: 'Teacher',
-		createdAt: '2024-01-01',
-	},
-	{
-		id: '3u1reuv4',
-		taskDescription: 'Another task description',
-		taskName: 'Second task name',
-		Role: 'Viewer',
-		createdAt: '2024-01-02',
-	},
-	{
-		id: 'derv1ws0',
-		taskDescription: 'Some task description',
-		taskName: 'Third task name',
-		Role: 'Pupil',
-		createdAt: '2024-01-03',
-	},
-	{
-		id: '5kma53ae',
-		taskDescription: 'Yet another task description',
-		taskName: 'Fourth task name',
-		Role: 'Teacher',
-		createdAt: '2024-01-04',
-	},
-	{
-		id: 'bhqecj4p',
-		taskDescription: 'Final task description',
-		taskName: 'Fifth task name',
-		Role: 'Pupil',
-		createdAt: '2024-01-05',
-	},
-	{
-		id: 'm5gr84i9',
-		taskDescription: 'This is task description',
-		taskName: 'Task name',
-		Role: 'Teacher',
-		createdAt: '2024-01-01',
-	},
-	{
-		id: '3u1reuv4',
-		taskDescription: 'Another task description',
-		taskName: 'Second task name',
-		Role: 'Viewer',
-		createdAt: '2024-01-02',
-	},
-	{
-		id: 'derv1ws0',
-		taskDescription: 'Some task description',
-		taskName: 'Third task name',
-		Role: 'Pupil',
-		createdAt: '2024-01-03',
-	},
-	{
-		id: '5kma53ae',
-		taskDescription: 'Yet another task description',
-		taskName: 'Fourth task name',
-		Role: 'Teacher',
-		createdAt: '2024-01-04',
-	},
-	{
-		id: 'bhqecj4p',
-		taskDescription: 'Final task description',
-		taskName: 'Fifth task name',
-		Role: 'Pupil',
-		createdAt: '2024-01-05',
-	},
-]
+import RemoveBtn from './removeBtn'
 
 export type Payment = {
 	id: string
@@ -148,6 +42,26 @@ export type Payment = {
 	taskName: string
 	Role: string
 	createdAt?: string
+}
+
+// 🔹 API dan ma’lumot olish
+const getTopics = async () => {
+	try {
+		const res = await fetch('http://localhost:3000/api/topics', {
+			cache: 'no-store',
+		})
+
+		if (!res.ok) {
+			throw new Error('Failed to fetch topics')
+		}
+
+		// Agar API `{ topics: [...] }` qaytarsa:
+		const { topics } = await res.json()
+		return topics
+	} catch (error) {
+		console.error('Error loading topics:', error)
+		return []
+	}
 }
 
 export const columns: ColumnDef<Payment>[] = [
@@ -176,97 +90,89 @@ export const columns: ColumnDef<Payment>[] = [
 	{
 		id: 'taskNumber',
 		header: '№',
-		cell: ({ row }) => {
-			return <div>{row.index + 1}</div>
-		},
-		enableSorting: false,
-		enableHiding: false,
+		cell: ({ row }) => <div>{row.index + 1}</div>,
 	},
-
 	{
 		accessorKey: 'taskName',
 		header: 'Task name',
-		cell: ({ row }) => (
-			<div className='capitalize'>{row.getValue('taskName')}</div>
-		),
+		cell: ({ row }) => <div>{row.getValue('taskName')}</div>,
 	},
 
 	{
 		accessorKey: 'Role',
-		header: ({ column }) => {
-			return (
-				<div
-					className='flex gap-2 items-center cursor-pointer'
-					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-				>
-					Role
-					<ArrowUpDown size={20} className='text-muted-foreground' />
-				</div>
-			)
-		},
-		cell: ({ row }) => <div className='lowercase'>{row.getValue('Role')}</div>,
+		header: ({ column }) => (
+			<div
+				className='flex gap-2 items-center cursor-pointer'
+				onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+			>
+				Role <ArrowUpDown size={20} className='text-muted-foreground' />
+			</div>
+		),
+		cell: ({ row }) => <div>{row.getValue('Role')}</div>,
 	},
 	{
 		accessorKey: 'taskDescription',
 		header: () => <div className='text-left'>Task Description</div>,
-		cell: ({ row }) => {
-			const description = row.getValue('taskDescription') as string
-			return <div className='text-left font-medium'>{description}</div>
-		},
+		cell: ({ row }) => (
+			<div className='text-left font-medium'>
+				{row.getValue('taskDescription')}
+			</div>
+		),
 	},
-
 	{
 		accessorKey: 'createdAt',
-		header: ({ column }) => {
-			return (
-				<div
-					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-				>
-					Created time
-				</div>
-			)
-		},
+		header: 'Created Time',
 		cell: ({ row }) => {
 			const date = row.getValue('createdAt') as string
-			const formatted = new Date(date).toLocaleDateString('en-US', {
-				year: 'numeric',
-				month: 'short',
-				day: 'numeric',
-			})
-
+			const formatted = new Date(date).toLocaleString()
 			return <div className='text-sm text-muted-foreground'>{formatted}</div>
 		},
 	},
-
 	{
 		id: 'actions',
-		enableHiding: false,
 		cell: ({ row }) => {
-			const payment = row.original
-
+			const topic = row.original
 			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild></DropdownMenuTrigger>
-					<div className='flex items-center gap-3 p-2 '>
-						<Link href={`/edit/${123}`}>
-							<Edit3Icon className='size-5' />
-						</Link>
-						<Trash2 className='size-5 text-red-500 cursor-pointer' />
-					</div>
-				</DropdownMenu>
+				<div className='flex items-center gap-3 p-2'>
+					<Link href={`/edit/${topic.id}`}>
+						<Edit3Icon className='size-5' />
+					</Link>
+					<RemoveBtn id={topic.id} />
+				</div>
 			)
 		},
 	},
 ]
 
 export function MyTaskTable() {
-	const [sorting, setSorting] = React.useState<SortingState>([])
-	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-		[]
-	)
-	const [columnVisibility, setColumnVisibility] =
-		React.useState<VisibilityState>({})
-	const [rowSelection, setRowSelection] = React.useState({})
+	const [data, setData] = useState<Payment[]>([])
+	const [loading, setLoading] = useState(true)
+	const [sorting, setSorting] = useState<SortingState>([])
+	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+	const [rowSelection, setRowSelection] = useState({})
+
+	// 🔹 Komponent yuklanganda ma’lumotni yuklash
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true)
+			const topics = await getTopics()
+
+			// Agar backend dagi nomlar boshqa bo‘lsa, shu yerda moslashtirasan:
+			const formatted = topics.map((t: any) => ({
+				id: t._id,
+				taskName: t.taskName,
+				taskDescription: t.taskDescription,
+				Role: t.role,
+				createdAt: t.createdAt,
+			}))
+
+			setData(formatted)
+			setLoading(false)
+		}
+
+		fetchData()
+	}, [])
 
 	const table = useReactTable({
 		data,
@@ -286,6 +192,10 @@ export function MyTaskTable() {
 			rowSelection,
 		},
 	})
+
+	if (loading) {
+		return <div className='text-center py-10'>Loading topics...</div>
+	}
 
 	return (
 		<div className='max-w-7xl mx-auto'>
@@ -308,48 +218,42 @@ export function MyTaskTable() {
 						{table
 							.getAllColumns()
 							.filter(column => column.getCanHide())
-							.map(column => {
-								return (
-									<DropdownMenuCheckboxItem
-										key={column.id}
-										className='capitalize'
-										checked={column.getIsVisible()}
-										onCheckedChange={value => column.toggleVisibility(!!value)}
-									>
-										{column.id}
-									</DropdownMenuCheckboxItem>
-								)
-							})}
+							.map(column => (
+								<DropdownMenuCheckboxItem
+									key={column.id}
+									className='capitalize'
+									checked={column.getIsVisible()}
+									onCheckedChange={value => column.toggleVisibility(!!value)}
+								>
+									{column.id}
+								</DropdownMenuCheckboxItem>
+							))}
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
+
 			<div className='overflow-hidden rounded-md border'>
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map(headerGroup => (
-							<TableRow key={headerGroup.id} className=''>
-								{headerGroup.headers.map(header => {
-									return (
-										<TableHead key={header.id} className='text-start'>
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext()
-												  )}
-										</TableHead>
-									)
-								})}
+							<TableRow key={headerGroup.id}>
+								{headerGroup.headers.map(header => (
+									<TableHead key={header.id} className='text-start'>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext()
+											  )}
+									</TableHead>
+								))}
 							</TableRow>
 						))}
 					</TableHeader>
 					<TableBody>
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map(row => (
-								<TableRow
-									key={row.id}
-									data-state={row.getIsSelected() && 'selected'}
-								>
+								<TableRow key={row.id}>
 									{row.getVisibleCells().map(cell => (
 										<TableCell key={cell.id} className='text-start'>
 											{flexRender(
@@ -364,7 +268,7 @@ export function MyTaskTable() {
 							<TableRow>
 								<TableCell
 									colSpan={columns.length}
-									className='h-24 text-center'
+									className='text-center h-24'
 								>
 									No results.
 								</TableCell>
@@ -372,30 +276,6 @@ export function MyTaskTable() {
 						)}
 					</TableBody>
 				</Table>
-			</div>
-			<div className='flex items-center justify-end space-x-2 py-4'>
-				<div className='text-muted-foreground flex-1 text-sm'>
-					{table.getFilteredSelectedRowModel().rows.length} of{' '}
-					{table.getFilteredRowModel().rows.length} row(s) selected.
-				</div>
-				<div className='space-x-2'>
-					<Button
-						variant='outline'
-						size='sm'
-						onClick={() => table.previousPage()}
-						disabled={!table.getCanPreviousPage()}
-					>
-						Previous
-					</Button>
-					<Button
-						variant='outline'
-						size='sm'
-						onClick={() => table.nextPage()}
-						disabled={!table.getCanNextPage()}
-					>
-						Next
-					</Button>
-				</div>
 			</div>
 		</div>
 	)

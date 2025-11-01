@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { LoaderIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -24,7 +25,9 @@ const Add = () => {
 	const [role, setRole] = useState('')
 	const [buttonLoading, setButtonLoading] = useState(false)
 
-	const sendData = (e: { preventDefault: () => void }) => {
+	const router = useRouter()
+
+	const sendData = async e => {
 		e.preventDefault()
 		setButtonLoading(true)
 
@@ -46,6 +49,24 @@ const Add = () => {
 				setTaskDescription('')
 				setRole('')
 			}, 1400)
+		}
+
+		try {
+			const res = await fetch('http://localhost:3000/api/topics', {
+				method: 'POST',
+				headers: {
+					'Content-type': 'application/json',
+				},
+				body: JSON.stringify({ taskDescription, taskName, role }),
+			})
+
+			if (res.ok) {
+				router.refresh()
+			} else {
+				throw new Error('Failed to create a topic')
+			}
+		} catch (error) {
+			console.log(error)
 		}
 	}
 
@@ -108,7 +129,7 @@ const Add = () => {
 						<div className='flex justify-end mt-4'>
 							{buttonLoading ? (
 								<div className='opacity-60 cursor-no-drop'>
-									<Button disabled>
+									<Button disabled type='submit'>
 										<LoaderIcon
 											role='status'
 											aria-label='Loading'
@@ -118,7 +139,9 @@ const Add = () => {
 									</Button>
 								</div>
 							) : (
-								<Button variant={'outline'}>Send</Button>
+								<Button type='submit' variant={'outline'}>
+									Send
+								</Button>
 							)}
 						</div>
 					</form>
